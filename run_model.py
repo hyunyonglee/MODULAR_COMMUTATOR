@@ -76,7 +76,7 @@ dmrg_params = {
     'mixer_params': {
         'amplitude': 1.e-5,
         'decay': 1.2,
-        'disable_after': 70
+        'disable_after': 50
     },
     'trunc_params': {
         'chi_max': CHI,
