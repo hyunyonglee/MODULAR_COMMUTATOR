@@ -10,8 +10,14 @@ import os.path
 import sys
 import matplotlib.pyplot as plt
 import pickle
-
 import logging.config
+
+def ensure_dir(f):
+    d=os.path.dirname(f)
+    if not os.path.exists(d):
+        os.makedirs(d)
+    return d;
+
 conf = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -100,7 +106,6 @@ mag_x = psi.expectation_value("Sigmax")
 mag_y = psi.expectation_value("Sigmay")
 mag_z = psi.expectation_value("Sigmaz")
 EE = psi.entanglement_entropy()
-ES = psi.entanglement_spectrum()
 
 # Measure Flux
 Fluxes = []
@@ -123,28 +128,31 @@ for i in range(0,Lx):
         flux = psi.expectation_value_term([('Sigmax',i0),('Sigmay',i1),('Sigmaz',i2),('Sigmax',i3),('Sigmay',i4),('Sigmaz',i5)])
         Fluxes.append(flux)
 
-file_Energy = open(PATH+"/Energy.txt","a")
-file_Energy.write(repr(K) + " " + repr(h) + " " + repr(E) + " " + repr(psi.correlation_length()) + " " + "\n")
-file_ES = open(PATH+"/Entanglement_Spectrum.txt","a")
-file_ES.write(repr(K) + " " + repr(h) + " " + "  ".join(map(str, ES[int(Ly/2)])) + " " + "\n")
-file_EE = open(PATH+"/Entanglement_Entropy.txt","a")
-file_EE.write(repr(K) + " " + repr(h) + " " + "  ".join(map(str, EE)) + " " + "\n")
-file_Ws = open(PATH+"/Flux.txt","a")
-file_Ws.write(repr(K) + " " + repr(h) + " " + "  ".join(map(str, Fluxes)) + " " + "\n")
-file_Sx = open(PATH+"/Sx.txt","a")
-file_Sx.write(repr(K) + " " + repr(h) + " " + "  ".join(map(str, mag_x)) + " " + "\n")
-file_Sy = open(PATH+"/Sy.txt","a")
-file_Sy.write(repr(K) + " " + repr(h) + " " + "  ".join(map(str, mag_y)) + " " + "\n")
-file_Sz = open(PATH+"/Sz.txt","a")
-file_Sz.write(repr(K) + " " + repr(h) + " " + "  ".join(map(str, mag_z)) + " " + "\n")
+ensure_dir(PATH + "observables/")
+ensure_dir(PATH + "entanglement/")
+ensure_dir(PATH + "logs/")
+ensure_dir(PATH + "mps/")
 
-file_STAT = open( (PATH+"/Stat_h_%.2f.txt" % h) ,"a")
+file_Energy = open(PATH+"observables/Energy.txt","a")
+file_Energy.write(repr(h) + " " + repr(E) + " " + repr(psi.correlation_length()) + " " + "\n")
+file_EE = open(PATH+"entanglement/Entanglement_Entropy.txt","a")
+file_EE.write(repr(h) + " " + "  ".join(map(str, EE)) + " " + "\n")
+file_Ws = open(PATH+"observables/Flux.txt","a")
+file_Ws.write(repr(h) + " " + "  ".join(map(str, Fluxes)) + " " + "\n")
+file_Sx = open(PATH+"observables/Sx.txt","a")
+file_Sx.write(repr(h) + " " + "  ".join(map(str, mag_x)) + " " + "\n")
+file_Sy = open(PATH+"observables/Sy.txt","a")
+file_Sy.write(repr(h) + " " + "  ".join(map(str, mag_y)) + " " + "\n")
+file_Sz = open(PATH+"observables/Sz.txt","a")
+file_Sz.write(repr(h) + " " + "  ".join(map(str, mag_z)) + " " + "\n")
+
+file_STAT = open( (PATH+"logs/Stat_h_%.2f.txt" % h) ,"a")
 file_STAT.write(" " + "  ".join(map(str,eng.sweep_stats['E'])) + " " + "\n")
 file_STAT.write(" " + "  ".join(map(str,eng.sweep_stats['S'])) + " " + "\n")
 file_STAT.write(" " + "  ".join(map(str,eng.sweep_stats['max_trunc_err'])) + " " + "\n")
 file_STAT.write(" " + "  ".join(map(str,eng.sweep_stats['norm_err'])) + " " + "\n")
 
-filename = 'psi_h_%.2f.pkl' % h
+filename = PATH + 'mps/psi_h_%.2f.pkl' % h
 with open( filename, 'wb') as f:
     pickle.dump(psi, f)
 
